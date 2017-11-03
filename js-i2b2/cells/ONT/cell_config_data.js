@@ -2,6 +2,7 @@
 // every file in this list will be loaded after the cell's Init function is called
 {
 	files: [
+		"crypto_javascript.js",
 		"ONT_view_Main.js",
 		"ONT_view_Nav.js",
 		"ONT_view_Find.js",

@@ -1,0 +1,33 @@
+<head>
+	<title>JS encryption tests</title>
+	<script type="text/javascript" src="test-medco-crypto-web.js"></script>
+	<script>
+		var pk,sk;
+		var cipher, plain;
+		var k = "hxLz3x/PoFtBJCVZxFdSiFIOn8OTalLu3c7pAmp7GQ4=";
+		var enc = "qGnM2koONG9UTqRmkQ3SDwR5Xux7+DeRz2ZIuOvoTUZks2kHP17F5SG5n2vB3VVkjOKy+Eg7MqIzF+Fl/N/u5Q=="
+
+		function genkey(){
+			[sk, pk] = GenKey()
+			alert("Secret key: " + sk + "\nPrivate key: " + pk)
+		}
+
+		function encrypt(){
+			cipher = EncryptInt(pk, 5000)
+			alert("Cipher: " + cipher)
+		}
+		function decrypt() {
+			plain = DecryptInt(cipher, sk)
+			alert("Plaintext: " + plain)
+			t = DecryptInt(enc,k)
+			alert(t);
+		}
+	</script>
+</head>
+<body>
+	<input type="button" onclick="genkey()" value="gen key">
+	<input type="button" onclick="encrypt()" value="encrypt 5000">
+	<input type="button" onclick="decrypt()" value="decrypt">
+
+</body>
+</html>

@@ -11,6 +11,11 @@
 
 // create the communicator Object
 i2b2.ONT.ajax = i2b2.hive.communicatorFactory("ONT");
+cryptoURL = i2b2["CRYPTO"].cfg.cellURL;
+keys = GenKey();
+i2b2.CRYPTO.publickey = keys[1];
+i2b2.CRYPTO.privatekey = keys[0];
+var sk = keys[0];
 i2b2.ONT.cfg.msgs = {};
 i2b2.ONT.cfg.parsers = {};
 i2b2.ONT.cfg.parsers.ExtractConcepts = function(){
@@ -30,7 +35,8 @@ i2b2.ONT.cfg.parsers.ExtractConcepts = function(){
 			o.tooltip = i2b2.h.getXNodeVal(c[i],'tooltip');
 			o.synonym = i2b2.h.getXNodeVal(c[i],'synonym_cd');
 			o.visual_attributes = i2b2.h.getXNodeVal(c[i],'visualattributes');
-			o.totalnum = i2b2.h.getXNodeVal(c[i],'totalnum');
+			tn = i2b2.h.getXNodeVal(c[i],'totalnum');
+			o.totalnum = DecryptInt(tn,keys[0]);
 			o.basecode = i2b2.h.getXNodeVal(c[i],'basecode');;
 			o.fact_table_column = i2b2.h.getXNodeVal(c[i],'facttablecolumn');
 			o.table_name = i2b2.h.getXNodeVal(c[i],'tablename');
@@ -52,7 +58,8 @@ i2b2.ONT.cfg.parsers.ExtractConcepts = function(){
 
 
 // ================================================================================================== //
-i2b2.ONT.cfg.msgs.GetChildConcepts = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
+i2b2.ONT.cfg.msgs.GetChildConcepts = function(){
+	return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
 '<ns3:request xmlns:ns3="http://www.i2b2.org/xsd/hive/msg/1.1/" xmlns:ns4="http://www.i2b2.org/xsd/cell/ont/1.1/" xmlns:ns2="http://www.i2b2.org/xsd/hive/plugin/">\n'+
 '    <message_header>\n'+
 '        {{{proxy_info}}}'+
@@ -97,15 +104,119 @@ i2b2.ONT.cfg.msgs.GetChildConcepts = '<?xml version="1.0" encoding="UTF-8" stand
 '    <message_body>\n'+
 '        <ns4:get_children blob="false" type="core" {{{ont_max_records}}} synonyms="{{{ont_synonym_records}}}" hiddens="{{{ont_hidden_records}}}">\n'+
 '            <parent>{{{concept_key_value}}}</parent>\n'+
+'            <pubkey>'+i2b2.CRYPTO.publickey+'</pubkey>\n'+
 '        </ns4:get_children>\n'+
 '    </message_body>\n'+
 '</ns3:request>';
+}
+
 i2b2.ONT.ajax._addFunctionCall(	"GetChildConcepts",
-								"{{{URL}}}getChildren",
-								i2b2.ONT.cfg.msgs.GetChildConcepts,
+								"http://localhost:9090/i2b2/services/CryptoService/getChildren",
+								i2b2.ONT.cfg.msgs.GetChildConcepts(),
 								null,
 								i2b2.ONT.cfg.parsers.ExtractConcepts);
 
+
+
+// ================================================================================================== //
+i2b2.ONT.cfg.msgs.GetTotalNums = function(){
+	keys = GenKey();
+	i2b2.CRYPTO.publickey = keys[1];
+	i2b2.CRYPTO.privatekey = keys[0];
+	return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
+'<ns3:request xmlns:ns3="http://www.i2b2.org/xsd/hive/msg/1.1/" xmlns:ns4="http://www.i2b2.org/xsd/cell/ont/1.1/" xmlns:ns2="http://www.i2b2.org/xsd/hive/plugin/">\n'+
+'    <message_header>\n'+
+'        {{{proxy_info}}}'+
+'        <i2b2_version_compatible>1.1</i2b2_version_compatible>\n'+
+'        <hl7_version_compatible>2.4</hl7_version_compatible>\n'+
+'        <sending_application>\n'+
+'            <application_name>i2b2 Ontology </application_name>\n'+
+'            <application_version>{{{version}}}</application_version>\n'+
+'        </sending_application>\n'+
+'        <sending_facility>\n'+
+'            <facility_name>i2b2 Hive</facility_name>\n'+
+'        </sending_facility>\n'+
+'        <receiving_application>\n'+
+'            <application_name>Ontology Cell</application_name>\n'+
+'            <application_version>{{{version}}}</application_version>\n'+
+'        </receiving_application>\n'+
+'        <receiving_facility>\n'+
+'            <facility_name>i2b2 Hive</facility_name>\n'+
+'        </receiving_facility>\n'+
+'        <datetime_of_message>{{{header_msg_datetime}}}</datetime_of_message>\n'+
+'		<security>\n'+
+'			<domain>{{{sec_domain}}}</domain>\n'+
+'			<username>{{{sec_user}}}</username>\n'+
+'			{{{sec_pass_node}}}\n'+
+'		</security>\n'+
+'        <message_control_id>\n'+
+'            <message_num>{{{header_msg_id}}}</message_num>\n'+
+'            <instance_num>0</instance_num>\n'+
+'        </message_control_id>\n'+
+'        <processing_id>\n'+
+'            <processing_id>P</processing_id>\n'+
+'            <processing_mode>I</processing_mode>\n'+
+'        </processing_id>\n'+
+'        <accept_acknowledgement_type>AL</accept_acknowledgement_type>\n'+
+'        <application_acknowledgement_type>AL</application_acknowledgement_type>\n'+
+'        <country_code>US</country_code>\n'+
+'        <project_id>{{{sec_project}}}</project_id>\n'+
+'    </message_header>\n'+
+'    <request_header>\n'+
+'        <result_waittime_ms>{{{result_wait_time}}}000</result_waittime_ms>\n'+
+'    </request_header>\n'+
+'    <message_body>\n'+
+'        <ns4:get_children blob="false" type="core" {{{ont_max_records}}} synonyms="{{{ont_synonym_records}}}" hiddens="{{{ont_hidden_records}}}">\n'+
+'            <concept>{{{concept_key_value}}}</concept>\n'+
+'            <pubkey>'+i2b2.CRYPTO.publickey+'</pubkey>\n'+
+'        </ns4:get_children>\n'+
+'    </message_body>\n'+
+'</ns3:request>';
+}
+
+i2b2.ONT.cfg.parsers.ExtractTotalNums = function(){
+	if (!this.error) {
+		this.model = [];		
+		// extract records from XML msg
+		var c = this.refXML.getElementsByTagName('concept');
+		for(var i=0; i<1*c.length; i++) {
+			var o = new Object;
+			o.xmlOrig = c[i];
+			o.name = i2b2.h.getXNodeVal(c[i],'name');
+			o.hasChildren = i2b2.h.getXNodeVal(c[i],'visualattributes');
+			if(typeof o.hasChildren !== "undefined")
+				o.hasChildren = i2b2.h.getXNodeVal(c[i],'visualattributes').substring(0,2);
+			o.level = i2b2.h.getXNodeVal(c[i],'level');
+			o.key = i2b2.h.getXNodeVal(c[i],'key');
+			o.tooltip = i2b2.h.getXNodeVal(c[i],'tooltip');
+			o.synonym = i2b2.h.getXNodeVal(c[i],'synonym_cd');
+			o.visual_attributes = i2b2.h.getXNodeVal(c[i],'visualattributes');
+			tn = i2b2.h.getXNodeVal(c[i],'totalnum');
+			o.totalnum = DecryptInt(tn,keys[0]);
+			o.basecode = i2b2.h.getXNodeVal(c[i],'basecode');;
+			o.fact_table_column = i2b2.h.getXNodeVal(c[i],'facttablecolumn');
+			o.table_name = i2b2.h.getXNodeVal(c[i],'tablename');
+			o.column_name = i2b2.h.getXNodeVal(c[i],'columnname');
+			o.column_datatype = i2b2.h.getXNodeVal(c[i],'columndatatype');
+			o.operator = i2b2.h.getXNodeVal(c[i],'operator');
+			o.dim_code = i2b2.h.getXNodeVal(c[i],'dimcode');
+			// encapsulate the data node into SDX package
+			var sdxDataPack = i2b2.sdx.Master.EncapsulateData('CONCPT',o);
+			// save extracted info
+			this.model.push(sdxDataPack);
+		}
+	} else {
+		this.model = false;
+		console.error("[ExtractConcepts] Could not parse() data!");
+	}
+	return this;
+};
+
+i2b2.ONT.ajax._addFunctionCall(	"GetTotalNums",
+								"http://localhost:9090/i2b2/services/CryptoService/getTotalNums",
+								i2b2.ONT.cfg.msgs.GetTotalNums(),
+								null,
+								i2b2.ONT.cfg.parsers.ExtractTotalNums);
 
 
 
@@ -161,7 +272,7 @@ i2b2.ONT.cfg.msgs.GetChildModifiers = '<?xml version="1.0" encoding="UTF-8" stan
 '    </message_body>\n'+
 '</ns3:request>';
 i2b2.ONT.ajax._addFunctionCall(	"GetChildModifiers",
-								"{{{URL}}}getModifierChildren",
+								"http://localhost:9090/i2b2/services/CryptoService/getModifierChildren",
 								i2b2.ONT.cfg.msgs.GetChildModifiers,
 								null,
 								i2b2.ONT.cfg.parsers.GetModifiers);
@@ -320,7 +431,7 @@ i2b2.ONT.cfg.parsers.GetModifiers = function(){
 	return this;
 };
 i2b2.ONT.ajax._addFunctionCall(	"GetModifiers",
-								"{{{URL}}}getModifiers",
+								"http://localhost:9090/i2b2/services/CryptoService/getModifiers",
 								i2b2.ONT.cfg.msgs.GetModifiers,
 								null,
 								i2b2.ONT.cfg.parsers.GetModifiers);

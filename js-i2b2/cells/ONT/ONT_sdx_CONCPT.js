@@ -489,7 +489,10 @@ i2b2.sdx.TypeControllers.CONCPT.MakeObject = function(c, modifier, cl_options, o
 			o.table_name = i2b2.h.getXNodeVal(c,'tablename');
 			o.column_name = i2b2.h.getXNodeVal(c,'columnname');
 			o.operator = i2b2.h.getXNodeVal(c,'operator');
-			o.total_num = i2b2.h.getXNodeVal(c,'totalnum');
+			enc = i2b2.h.getXNodeVal(c,'totalnum');
+			alert("decrypting "+enc+" with key "+sk);
+			o.total_num = DecryptInt(enc,sk);
+			alert(o.total_num);
 			o.synonym_cd = i2b2.h.getXNodeVal(c,'synonym_cd');
 			o.dim_code = i2b2.h.getXNodeVal(c,'dimcode');
 			o.basecode = i2b2.h.getXNodeVal(c,'basecode');
