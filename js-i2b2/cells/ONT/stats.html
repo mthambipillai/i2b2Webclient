@@ -1,0 +1,30 @@
+<html>
+	<head>
+		<script type='text/javascript' src='../../../js-ext/d3code/d3.v3.js'></script>
+		<link href='../../../js-ext/c3code/c3.css' rel='stylesheet' type='text/css'>
+		<script src='../../../js-ext/c3code/c3.js'></script>
+	</head>
+	<body>
+		<h3>Total numbers evolution for all locations</h3>
+			<div id='chart'>
+				<script>
+					var d = window.opener.dataObj;
+					//alert(d);
+					var chart=c3.generate({data : d, axis: {
+						x: {
+				        label: {
+				          text: 'Time (year)',
+				          position: 'outer-middle'
+				        }
+				      },
+				      y: {
+				        label: {
+				          text: 'Total number',
+				          position: 'outer-middle'
+				        }
+				      }
+				    }});
+				</script>
+			</div>
+	</body>
+</html>

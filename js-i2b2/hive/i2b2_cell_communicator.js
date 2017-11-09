@@ -228,7 +228,7 @@ i2b2.hive.communicatorFactory = function(cellCode){
 			return true;
 		} else { 
 			// perform a SYNC query 
-			var ajaxresult = new Ajax.Request(sProxy_Url, commOptions);	
+			var ajaxresult = new Ajax.Request(sProxy_Url, commOptions);
 			var transport = ajaxresult.transport;
 			// create our data message to return from the function
 			var cbMsg = {

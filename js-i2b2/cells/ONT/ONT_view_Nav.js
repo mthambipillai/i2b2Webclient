@@ -244,7 +244,8 @@ i2b2.events.afterCellInit.subscribe(
 						{ lazyload: true,
 						trigger: $('ontNavDisp'), 
 						itemdata: [
-							{ text: "Refresh All",	onclick: { fn: i2b2.ONT.view.nav.doRefreshAll } }
+							{ text: "Refresh All",	onclick: { fn: i2b2.ONT.view.nav.doRefreshAll } },
+							{ text: "Stats",	onclick: { fn: i2b2.ONT.view.nav.stats } }
 					] }  
 			); 
 			i2b2.ONT.view.nav.ContextMenu.subscribe("triggerContextMenu",i2b2.ONT.view.nav.ContextMenuValidate);			
@@ -271,9 +272,18 @@ i2b2.ONT.view.nav.doRefreshAll = function() {
 }
 
 //================================================================================================== //
+i2b2.ONT.view.nav.stats = function(p_oEvent) {
+	var statsWindow = window.open('js-i2b2/cells/ONT/load.html',"Stats",'width=900,height=600');
+	var node = i2b2.ONT.view.nav.current;
+	var key = node.data.i2b2_SDX.sdxInfo.sdxKeyValue;
+	i2b2.ONT.ctrlr.gen.getTotalNums(key);
+}
+
+//================================================================================================== //
 i2b2.ONT.view.nav.ContextMenuValidate = function(p_oEvent) {
 	var clickId = null;
 	var currentNode = this.contextEventTarget;
+	i2b2.ONT.view.nav.current = i2b2.ONT.view.nav.yuiTree.getNodeByElement(currentNode);
 	while (!currentNode.id) {
 		if (currentNode.parentNode) {
 			currentNode = currentNode.parentNode;

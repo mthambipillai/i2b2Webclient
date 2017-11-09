@@ -490,9 +490,14 @@ i2b2.sdx.TypeControllers.CONCPT.MakeObject = function(c, modifier, cl_options, o
 			o.column_name = i2b2.h.getXNodeVal(c,'columnname');
 			o.operator = i2b2.h.getXNodeVal(c,'operator');
 			enc = i2b2.h.getXNodeVal(c,'totalnum');
-			alert("decrypting "+enc+" with key "+sk);
-			o.total_num = DecryptInt(enc,sk);
-			alert(o.total_num);
+			//alert("decrypting "+enc+" with key "+sk);
+			if(enc!=null){
+				o.total_num = DecryptInt(enc,sk);
+			}else{
+				o.total_num = enc;
+			}
+			
+			//alert(o.total_num);
 			o.synonym_cd = i2b2.h.getXNodeVal(c,'synonym_cd');
 			o.dim_code = i2b2.h.getXNodeVal(c,'dimcode');
 			o.basecode = i2b2.h.getXNodeVal(c,'basecode');

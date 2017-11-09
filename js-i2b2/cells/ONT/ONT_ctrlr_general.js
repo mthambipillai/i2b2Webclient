@@ -71,6 +71,74 @@ i2b2.ONT.ctrlr.gen.loadCategories = function() {
 }
 
 // ================================================================================================== //
+i2b2.ONT.ctrlr.gen.getTotalNums = function(key) {
+	console.info("CALLED i2b2.ONT.ctrlr.gen.getTotalNums()");
+	var processXML = function(i2b2CellMsg) {
+		i2b2.ONT.view.nav.queryResponse = i2b2CellMsg.msgResponse;
+		i2b2.ONT.view.nav.queryRequest = i2b2CellMsg.msgRequest;
+		if (!i2b2CellMsg.error) {
+			var locations = {};
+			var timesPerLocation = {};
+			var totalnumsPerLocation = {};
+			var c = i2b2CellMsg.refXML.getElementsByTagName('totalnum_group');
+			for(var i=0; i<1*c.length; i++) {
+				location_cd = i2b2.h.getXNodeVal(c[i],'location');
+				if(!locations[location_cd]){
+					locations[location_cd] = "x"+i;
+				}
+				time = i2b2.h.getXNodeVal(c[i],'time');
+				if(!timesPerLocation[locations[location_cd]]){
+					timesPerLocation[locations[location_cd]] = [locations[location_cd],time];
+				}else{
+					timesPerLocation[locations[location_cd]].push(time);
+				}
+				tn = i2b2.h.getXNodeVal(c[i],'totalnum');
+				totalnum = DecryptInt(tn,i2b2.CRYPTO.privatekey);
+				if(!totalnumsPerLocation[location_cd]){
+					totalnumsPerLocation[location_cd] = [location_cd,totalnum];
+				}else{
+					totalnumsPerLocation[location_cd].push(totalnum);
+				}
+				//alert(location_cd+"\n"+time+"\n"+totalnum);
+			}
+			columns = []
+			for (var property in timesPerLocation) {
+			    if (timesPerLocation.hasOwnProperty(property)) {
+			        columns.push(timesPerLocation[property])
+			    }
+			}
+			for (var property in totalnumsPerLocation) {
+			    if (totalnumsPerLocation.hasOwnProperty(property)) {
+			        columns.push(totalnumsPerLocation[property])
+			    }
+			}
+			window.dataObj = {"bindto":'#chart',"xs":locations,"columns":columns}
+			stats = window.open('js-i2b2/cells/ONT/stats.html',"Stats",'width=900,height=600');
+			
+			//var statsWindow = window.open('',"Stats");
+			//statsWindow.data = dataObj;
+			//statsWindow.location = 'js-i2b2/cells/ONT/stats.html';
+			/*stats.document.write("<h3>Statistical results</h3>"+
+				"<div id='chart'>"+
+					"<script>"+
+						"var d = window.data;"+
+						"var chart=c3.generate({data : d});"+
+					"</script>"+
+				"</div>");*/
+			//alert(JSON.stringify(dataObj));
+		} else {
+			alert("An error has occurred in the Cell's AJAX library.\n Press F12 for more information");
+		}
+	};
+	var scopeCB = new i2b2_scopedCallback(processXML,null);
+	var options = {};
+	options.ont_hidden_records = i2b2.ONT.view['nav'].params.hiddens;
+	options.ont_synonym_records = i2b2.ONT.view['nav'].params.synonyms;
+	options.concept_key_value = key;
+	i2b2.ONT.ajax.GetTotalNums("ONT:generalView", options, scopeCB);
+}
+
+// ================================================================================================== //
 i2b2.ONT.ctrlr.gen.loadSchemes = function() {
 	console.info("CALLED i2b2.ONT.ctrlr.gen.loadSchemes()");
 	// THIS FUNCTION DOES THE FOLLOWING:
