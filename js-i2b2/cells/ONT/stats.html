@@ -3,28 +3,79 @@
 		<script type='text/javascript' src='../../../js-ext/d3code/d3.v3.js'></script>
 		<link href='../../../js-ext/c3code/c3.css' rel='stylesheet' type='text/css'>
 		<script src='../../../js-ext/c3code/c3.js'></script>
+		<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+		<script>
+			function queryNewData(){
+				document.getElementById('chart').innerHTML="<h2>Please wait while updating the results...</h2>";
+				from = document.getElementById("from").value.split("-");
+				to = document.getElementById("to").value.split("-");
+				fromDateYear = +from[0] + +(from[1]/12) + +(from[2]/365);
+				toDateYear = +to[0] + +(to[1]/12) + +(to[2]/365);
+				window.opener.ready = false;
+				window.opener.i2b2.CRYPTO.fromTime = fromDateYear.toString();
+				window.opener.i2b2.CRYPTO.toTime = toDateYear.toString();
+				window.opener.query();
+				document.getElementById('chart').innerHTML="<h2>Please wait while updating the results...</h2>";
+			}
+			function yearToDate(yearDate){
+				sep = yearDate.split(".");
+				year = sep[0];
+				if(sep.length==1){
+					return year+"-1-1";
+				}else{
+					monthDay = "0."+sep[1];
+					month = Math.floor(+monthDay * 12);
+					day = (((+monthDay)*1.2 - month/10)*365).toFixed();
+					if(day==0){
+						day=1;
+					}
+					if(day>28){
+						day=28;
+					}
+					return year+"-"+month.toString()+"-"+day.toString();
+				}
+			}
+		</script>
 	</head>
 	<body>
 		<h3>Total numbers evolution for all locations</h3>
+			<div id='params'>
+				<div id='time'>
+					<form id='updatetimeperiod' onsubmit="return queryNewData()">
+					  From:
+					  <input id='from' type="date" name="from">
+					  To:
+					  <input id='to' type="date" name="to">
+					  <input type="submit" name="Apply" value="Apply">
+					</form>
+				</div>
+			</div>
 			<div id='chart'>
 				<script>
-					var d = window.opener.dataObj;
-					//alert(d);
-					var chart=c3.generate({data : d, axis: {
-						x: {
-				        label: {
-				          text: 'Time (year)',
-				          position: 'outer-middle'
-				        }
-				      },
-				      y: {
-				        label: {
-				          text: 'Total number',
-				          position: 'outer-middle'
-				        }
-				      }
-				    }});
+					if(window.opener.ready){
+						var d = window.opener.dataObj;
+						var chart=c3.generate({data : d, axis: {
+							x: {
+					        label: {
+					          text: 'Time (year)',
+					          position: 'outer-middle'
+					        }
+					      },
+					      y: {
+					        label: {
+					          text: 'Total number',
+					          position: 'outer-middle'
+					        }
+					      }
+					    }});
+					}else{
+						document.getElementById('chart').innerHTML="<h2>Please wait while updating the results...</h2>";
+					}
 				</script>
 			</div>
 	</body>
+	<script type="text/javascript">
+		document.getElementById('to').valueAsDate = new Date(yearToDate(window.opener.i2b2.CRYPTO.toTime));
+		document.getElementById('from').valueAsDate = new Date(yearToDate(window.opener.i2b2.CRYPTO.fromTime));
+	</script>
 </html>

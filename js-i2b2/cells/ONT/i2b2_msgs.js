@@ -8,14 +8,17 @@
  * updated 9-15-08: RC4 launch [Nick Benik] 
  */
 
-
 // create the communicator Object
 i2b2.ONT.ajax = i2b2.hive.communicatorFactory("ONT");
 cryptoURL = i2b2["CRYPTO"].cfg.cellURL;
 keys = GenKey();
 i2b2.CRYPTO.publickey = keys[1];
 i2b2.CRYPTO.privatekey = keys[0];
-var sk = keys[0];
+var now = new Date();
+i2b2.CRYPTO.defaultPeriod = 8
+i2b2.CRYPTO.fromTime = (now.getFullYear()-i2b2.CRYPTO.defaultPeriod).toString();
+i2b2.CRYPTO.toTime = (now.getFullYear()+(now.getMonth()/12)).toString();
+
 i2b2.ONT.cfg.msgs = {};
 i2b2.ONT.cfg.parsers = {};
 i2b2.ONT.cfg.parsers.ExtractConcepts = function(){
@@ -119,11 +122,7 @@ i2b2.ONT.ajax._addFunctionCall(	"GetChildConcepts",
 
 
 // ================================================================================================== //
-i2b2.ONT.cfg.msgs.GetTotalNums = function(){
-	keys = GenKey();
-	i2b2.CRYPTO.publickey = keys[1];
-	i2b2.CRYPTO.privatekey = keys[0];
-	return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
+i2b2.ONT.cfg.msgs.GetTotalNums = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
 '<ns3:request xmlns:ns3="http://www.i2b2.org/xsd/hive/msg/1.1/" xmlns:ns4="http://www.i2b2.org/xsd/cell/ont/1.1/" xmlns:ns2="http://www.i2b2.org/xsd/hive/plugin/">\n'+
 '    <message_header>\n'+
 '        {{{proxy_info}}}'+
@@ -169,14 +168,15 @@ i2b2.ONT.cfg.msgs.GetTotalNums = function(){
 '        <ns4:get_children blob="false" type="core" {{{ont_max_records}}} synonyms="{{{ont_synonym_records}}}" hiddens="{{{ont_hidden_records}}}">\n'+
 '            <concept>{{{concept_key_value}}}</concept>\n'+
 '            <pubkey>'+i2b2.CRYPTO.publickey+'</pubkey>\n'+
+'            <fromtime>'+i2b2.CRYPTO.fromTime+'</fromtime>\n'+
+'            <totime>'+i2b2.CRYPTO.toTime+'</totime>\n'+
 '        </ns4:get_children>\n'+
 '    </message_body>\n'+
 '</ns3:request>';
-}
 
 i2b2.ONT.cfg.parsers.ExtractTotalNums = function(){
 	if (!this.error) {
-		this.model = [];		
+		this.model = [];
 		// extract records from XML msg
 		var c = this.refXML.getElementsByTagName('concept');
 		for(var i=0; i<1*c.length; i++) {
@@ -214,7 +214,7 @@ i2b2.ONT.cfg.parsers.ExtractTotalNums = function(){
 
 i2b2.ONT.ajax._addFunctionCall(	"GetTotalNums",
 								"http://localhost:9090/i2b2/services/CryptoService/getTotalNums",
-								i2b2.ONT.cfg.msgs.GetTotalNums(),
+								i2b2.ONT.cfg.msgs.GetTotalNums,
 								null,
 								i2b2.ONT.cfg.parsers.ExtractTotalNums);
 
