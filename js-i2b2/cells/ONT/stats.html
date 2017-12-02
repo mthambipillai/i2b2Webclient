@@ -5,17 +5,34 @@
 		<script src='../../../js-ext/c3code/c3.js'></script>
 		<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 		<script>
-			function queryNewData(){
-				document.getElementById('chart').innerHTML="<h2>Please wait while updating the results...</h2>";
+			function updateTimeRange(){
 				from = document.getElementById("from").value.split("-");
 				to = document.getElementById("to").value.split("-");
 				fromDateYear = +from[0] + +(from[1]/12) + +(from[2]/365);
 				toDateYear = +to[0] + +(to[1]/12) + +(to[2]/365);
-				window.opener.ready = false;
 				window.opener.i2b2.CRYPTO.fromTime = fromDateYear.toString();
 				window.opener.i2b2.CRYPTO.toTime = toDateYear.toString();
-				window.opener.query();
-				document.getElementById('chart').innerHTML="<h2>Please wait while updating the results...</h2>";
+			}
+			function queryNewPointData(){
+				updateTimeRange();
+				window.opener.readypoint = false;
+				window.opener.queryPoint();			
+			}
+			function queryNewCumulativeData(){
+				updateTimeRange();
+				window.opener.readycumulative = false;
+				window.opener.queryCumulative();
+			}
+			function queryNewData(){
+				updateTimeRange();
+				window.opener.readypoint = false;
+				window.opener.readycumulative = false;
+				if(document.getElementById('pointDistribution').checked){
+					window.opener.evolutionChecked=true;
+					window.opener.queryAll();
+				}else{
+					window.opener.queryCumulative();
+				}
 			}
 			function yearToDate(yearDate){
 				sep = yearDate.split(".");
@@ -38,44 +55,84 @@
 		</script>
 	</head>
 	<body>
-		<h3>Total numbers evolution for all locations</h3>
-			<div id='params'>
-				<div id='time'>
-					<form id='updatetimeperiod' onsubmit="return queryNewData()">
-					  From:
-					  <input id='from' type="date" name="from">
-					  To:
-					  <input id='to' type="date" name="to">
-					  <input type="submit" name="Apply" value="Apply">
-					</form>
-				</div>
-			</div>
-			<div id='chart'>
-				<script>
-					if(window.opener.ready){
-						var d = window.opener.dataObj;
-						var chart=c3.generate({data : d, axis: {
-							x: {
-					        label: {
-					          text: 'Time (year)',
-					          position: 'outer-middle'
-					        }
-					      },
-					      y: {
-					        label: {
-					          text: 'Total number',
-					          position: 'outer-middle'
-					        }
-					      }
-					    }});
-					}else{
-						document.getElementById('chart').innerHTML="<h2>Please wait while updating the results...</h2>";
-					}
-				</script>
-			</div>
+		<h3>Total numbers for concept path 
+			<script type="text/javascript">
+				//(17,-1) is to trim the unnecessary \\i2b2_DIAG\i2b2\ and other path prefixes or suffixes.
+				var str = window.opener.i2b2.CRYPTO.currentConceptPath
+				document.write('"'+str.substring(17,str.length-1)+'"');
+			</script>
+		</h3>
+		<div id='params'>
+			<form id='update' onsubmit="return queryNewData()">
+			  From:
+			  <input id='from' type="date" name="from">
+			  To:
+			  <input id='to' type="date" name="to">
+			  <input type="checkbox" id="pointDistribution" value="pointDistribution" unchecked>
+			  <label for="pointDistribution">Display time evolution</label>
+			  <input style="margin-top: 10px" type="submit" name="Apply" value="Apply">
+			</form>
+		</div>
+		<div id='chart1'>
+		</div>
+		<div id='chart'>
+		</div>
 	</body>
 	<script type="text/javascript">
 		document.getElementById('to').valueAsDate = new Date(yearToDate(window.opener.i2b2.CRYPTO.toTime));
 		document.getElementById('from').valueAsDate = new Date(yearToDate(window.opener.i2b2.CRYPTO.fromTime));
+		if(window.opener.evolutionChecked){
+			document.getElementById('pointDistribution').checked = true;
+		}
+		if(window.opener.readycumulative){
+			var d2 = window.opener.dataObjCumulative;
+			var chart2=c3.generate({
+				bindto: '#chart1',
+				data: d2, axis: {
+				x: {
+					type : 'categorized',
+					tick: {
+			            format: function (x) { return ''; }
+			        },
+			        label: {
+			        	text: 'Locations',
+			        	position: 'outer-middle'
+			        }
+			    },
+			    y: {
+			    	label: {
+			        	text: 'Total number',
+			        	position: 'outer-middle'
+			    	}
+			    }
+		    }});
+		}else{
+			document.getElementById('chart1').innerHTML="<h3>Please wait while updating the results...</h3>";
+		}
+		if(window.opener.readypoint){
+			var d1 = window.opener.dataObjPoint;
+			var chart1=c3.generate({
+				bindto: '#chart',
+				data: d1, axis: {
+				x: {
+		        label: {
+		          text: 'Time (year)',
+		          position: 'outer-middle'
+		        }
+		      },
+		      y: {
+		        label: {
+		          text: 'Total number',
+		          position: 'outer-middle'
+		        }
+		      }
+		    }});
+		}else{
+			if(window.opener.i2b2.CRYPTO.pointDistribution){
+				document.getElementById('chart').innerHTML="<h3>Please wait while updating the results...</h3>";
+			}else{
+				document.getElementById('chart').innerHTML="";
+			}
+		}
 	</script>
 </html>

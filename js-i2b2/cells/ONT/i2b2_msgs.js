@@ -18,6 +18,7 @@ var now = new Date();
 i2b2.CRYPTO.defaultPeriod = 8
 i2b2.CRYPTO.fromTime = (now.getFullYear()-i2b2.CRYPTO.defaultPeriod).toString();
 i2b2.CRYPTO.toTime = (now.getFullYear()+(now.getMonth()/12)).toString();
+i2b2.CRYPTO.distribution = "cumulative";//can be 'point' or 'cumulative'
 
 i2b2.ONT.cfg.msgs = {};
 i2b2.ONT.cfg.parsers = {};
@@ -170,6 +171,7 @@ i2b2.ONT.cfg.msgs.GetTotalNums = '<?xml version="1.0" encoding="UTF-8" standalon
 '            <pubkey>'+i2b2.CRYPTO.publickey+'</pubkey>\n'+
 '            <fromtime>'+i2b2.CRYPTO.fromTime+'</fromtime>\n'+
 '            <totime>'+i2b2.CRYPTO.toTime+'</totime>\n'+
+'            <distribution>'+i2b2.CRYPTO.distribution+'</distribution>\n'+
 '        </ns4:get_children>\n'+
 '    </message_body>\n'+
 '</ns3:request>';

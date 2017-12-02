@@ -273,9 +273,11 @@ i2b2.ONT.view.nav.doRefreshAll = function() {
 
 //================================================================================================== //
 i2b2.ONT.view.nav.stats = function(p_oEvent) {
-	var statsWindow = window.open('js-i2b2/cells/ONT/load.html',"Stats",'width=900,height=600');
+	var statsWindow = window.open('js-i2b2/cells/ONT/load.html',"Stats",'width=1400,height=800');
 	var node = i2b2.ONT.view.nav.current;
 	var key = node.data.i2b2_SDX.sdxInfo.sdxKeyValue;
+	i2b2.CRYPTO.distribution="cumulative";//can be point or cumulative
+	i2b2.CRYPTO.pointDistribution = false;
 	i2b2.ONT.ctrlr.gen.getTotalNums(key);
 }
 

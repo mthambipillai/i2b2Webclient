@@ -10,9 +10,23 @@
 console.group('Load & Execute component file: ONT > ctrlr > general');
 console.time('execute time');
 
-window.query = function(){
+window.queryPoint = function(){
 	var node = i2b2.ONT.view.nav.current;
 	var key = node.data.i2b2_SDX.sdxInfo.sdxKeyValue;
+	i2b2.CRYPTO.distribution="point";
+	i2b2.ONT.ctrlr.gen.getTotalNums(key);
+}
+window.queryCumulative = function(){
+	var node = i2b2.ONT.view.nav.current;
+	var key = node.data.i2b2_SDX.sdxInfo.sdxKeyValue;
+	i2b2.CRYPTO.distribution="cumulative";
+	i2b2.ONT.ctrlr.gen.getTotalNums(key);
+}
+
+window.queryAll = function(){
+	var node = i2b2.ONT.view.nav.current;
+	var key = node.data.i2b2_SDX.sdxInfo.sdxKeyValue;
+	i2b2.CRYPTO.distribution="point";
 	i2b2.ONT.ctrlr.gen.getTotalNums(key);
 }
 
@@ -91,11 +105,13 @@ i2b2.ONT.ctrlr.gen.getTotalNums = function(key) {
 				if(!locations[location_cd]){
 					locations[location_cd] = "x"+i;
 				}
-				time = i2b2.h.getXNodeVal(c[i],'time');
-				if(!timesPerLocation[locations[location_cd]]){
-					timesPerLocation[locations[location_cd]] = [locations[location_cd],time];
-				}else{
-					timesPerLocation[locations[location_cd]].push(time);
+				if(i2b2.CRYPTO.distribution=="point"){
+					time = i2b2.h.getXNodeVal(c[i],'time');
+					if(!timesPerLocation[locations[location_cd]]){
+						timesPerLocation[locations[location_cd]] = [locations[location_cd],time];
+					}else{
+						timesPerLocation[locations[location_cd]].push(time);
+					}
 				}
 				tn = i2b2.h.getXNodeVal(c[i],'totalnum');
 				totalnum = DecryptInt(tn,i2b2.CRYPTO.privatekey);
@@ -116,9 +132,27 @@ i2b2.ONT.ctrlr.gen.getTotalNums = function(key) {
 			        columns.push(totalnumsPerLocation[property])
 			    }
 			}
-			window.ready = true
-			window.dataObj = {"bindto":'#chart',"xs":locations,"columns":columns}
-			i2b2.CRYPTO.stats = window.open('js-i2b2/cells/ONT/stats.html',"Stats",'width=900,height=600');
+			if(i2b2.CRYPTO.distribution=="point"){
+				window.readypoint = true;
+				window.dataObjPoint = {"xs":locations,"columns":columns};
+				var aggrColumns = [];
+				for (var property in totalnumsPerLocation){
+					if(totalnumsPerLocation.hasOwnProperty(property)){
+						var array = totalnumsPerLocation[property]
+						var sum =array.slice(1).reduce(add, 0);
+						function add(a, b) {
+						   return a + b;
+						}
+						aggrColumns.push([array[0],sum]);
+					}
+				}
+				window.readycumulative = true;
+				window.dataObjCumulative = {"columns":aggrColumns,"type":'bar'};
+			}else{
+				window.readycumulative = true;
+				window.dataObjCumulative = {"columns":columns,"type":'bar'};
+			}
+			i2b2.CRYPTO.stats = window.open('js-i2b2/cells/ONT/stats.html',"Stats",'width=1400,height=800');
 		} else {
 			alert("An error has occurred in the Cell's AJAX library.\n Press F12 for more information");
 		}
@@ -128,6 +162,7 @@ i2b2.ONT.ctrlr.gen.getTotalNums = function(key) {
 	options.ont_hidden_records = i2b2.ONT.view['nav'].params.hiddens;
 	options.ont_synonym_records = i2b2.ONT.view['nav'].params.synonyms;
 	options.concept_key_value = key;
+	i2b2.CRYPTO.currentConceptPath = key;
 	i2b2.ONT.cfg.msgs.GetTotalNums = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
 	'<ns3:request xmlns:ns3="http://www.i2b2.org/xsd/hive/msg/1.1/" xmlns:ns4="http://www.i2b2.org/xsd/cell/ont/1.1/" xmlns:ns2="http://www.i2b2.org/xsd/hive/plugin/">\n'+
 	'    <message_header>\n'+
@@ -176,6 +211,7 @@ i2b2.ONT.ctrlr.gen.getTotalNums = function(key) {
 	'            <pubkey>'+i2b2.CRYPTO.publickey+'</pubkey>\n'+
 	'            <fromtime>'+i2b2.CRYPTO.fromTime+'</fromtime>\n'+
 	'            <totime>'+i2b2.CRYPTO.toTime+'</totime>\n'+
+	'            <distribution>'+i2b2.CRYPTO.distribution+'</distribution>\n'+
 	'        </ns4:get_children>\n'+
 	'    </message_body>\n'+
 	'</ns3:request>';
