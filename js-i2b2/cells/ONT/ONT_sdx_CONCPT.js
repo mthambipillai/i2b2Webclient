@@ -492,7 +492,7 @@ i2b2.sdx.TypeControllers.CONCPT.MakeObject = function(c, modifier, cl_options, o
 			enc = i2b2.h.getXNodeVal(c,'totalnum');
 			//alert("decrypting "+enc+" with key "+sk);
 			if(enc!=null){
-				o.total_num = DecryptInt(enc,sk);
+				o.total_num = DecryptInt(enc,i2b2.CRYPTO.privatekey);
 			}else{
 				o.total_num = enc;
 			}

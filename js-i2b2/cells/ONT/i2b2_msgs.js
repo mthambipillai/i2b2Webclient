@@ -20,6 +20,8 @@ i2b2.CRYPTO.fromTime = (now.getFullYear()-i2b2.CRYPTO.defaultPeriod).toString();
 i2b2.CRYPTO.toTime = (now.getFullYear()+(now.getMonth()/12)).toString();
 i2b2.CRYPTO.distribution = "cumulative";//can be 'point' or 'cumulative'
 
+i2b2.CRYPTO.decryptionCache = {}
+
 i2b2.ONT.cfg.msgs = {};
 i2b2.ONT.cfg.parsers = {};
 i2b2.ONT.cfg.parsers.ExtractConcepts = function(){
@@ -115,7 +117,7 @@ i2b2.ONT.cfg.msgs.GetChildConcepts = function(){
 }
 
 i2b2.ONT.ajax._addFunctionCall(	"GetChildConcepts",
-								"http://localhost:9090/i2b2/services/CryptoService/getChildren",
+								cryptoURL+"getChildren",
 								i2b2.ONT.cfg.msgs.GetChildConcepts(),
 								null,
 								i2b2.ONT.cfg.parsers.ExtractConcepts);
@@ -215,7 +217,7 @@ i2b2.ONT.cfg.parsers.ExtractTotalNums = function(){
 };
 
 i2b2.ONT.ajax._addFunctionCall(	"GetTotalNums",
-								"http://localhost:9090/i2b2/services/CryptoService/getTotalNums",
+								cryptoURL+"getTotalNums",
 								i2b2.ONT.cfg.msgs.GetTotalNums,
 								null,
 								i2b2.ONT.cfg.parsers.ExtractTotalNums);
