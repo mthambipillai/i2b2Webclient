@@ -117,7 +117,7 @@ i2b2.ONT.cfg.msgs.GetChildConcepts = function(){
 }
 
 i2b2.ONT.ajax._addFunctionCall(	"GetChildConcepts",
-								cryptoURL+"getChildren",
+								cryptoURL+"/getChildren",
 								i2b2.ONT.cfg.msgs.GetChildConcepts(),
 								null,
 								i2b2.ONT.cfg.parsers.ExtractConcepts);

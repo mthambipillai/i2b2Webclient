@@ -135,24 +135,12 @@ i2b2.ONT.ctrlr.gen.getTotalNums = function(key) {
 			if(i2b2.CRYPTO.distribution=="point"){
 				window.readypoint = true;
 				window.dataObjPoint = {"xs":locations,"columns":columns};
-				var aggrColumns = [];
-				for (var property in totalnumsPerLocation){
-					if(totalnumsPerLocation.hasOwnProperty(property)){
-						var array = totalnumsPerLocation[property]
-						var sum =array.slice(1).reduce(add, 0);
-						function add(a, b) {
-						   return a + b;
-						}
-						aggrColumns.push([array[0],sum]);
-					}
-				}
-				window.readycumulative = true;
-				window.dataObjCumulative = {"columns":aggrColumns,"type":'bar'};
+				i2b2.CRYPTO.stats = window.open('js-i2b2/cells/ONT/statsPoint.html',"Stats",'width=1100,height=800');
 			}else{
 				window.readycumulative = true;
 				window.dataObjCumulative = {"columns":columns,"type":'bar'};
+				i2b2.CRYPTO.stats = window.open('js-i2b2/cells/ONT/statsCumulative.html',"Stats",'width=1100,height=800');
 			}
-			i2b2.CRYPTO.stats = window.open('js-i2b2/cells/ONT/stats.html',"Stats",'width=1100,height=800');
 		} else {
 			alert("An error has occurred in the Cell's AJAX library.\n Press F12 for more information");
 		}

@@ -238,15 +238,22 @@ i2b2.events.afterCellInit.subscribe(
 					console.groupEnd();
 				})
 			);
-
+			hasCumulRights = i2b2.PM.model.userRoles.indexOf('TOTALNUMSCUMUL')>-1;
+			hasNoisyCumulRights = i2b2.PM.model.userRoles.indexOf('TOTALNUMSCUMUL_NOISY')>-1;
+			hasTimeRights = i2b2.PM.model.userRoles.indexOf('TOTALNUMSTIME')>-1;
+			hasNoisyTimeRights = i2b2.PM.model.userRoles.indexOf('TOTALNUMSTIME_NOISY')>-1;
+			menu = [{ text: "Refresh All",	onclick: { fn: i2b2.ONT.view.nav.doRefreshAll } }]
+			if(hasCumulRights || hasNoisyCumulRights){
+				menu.push({ text: "Total Nums per location",	onclick: { fn: i2b2.ONT.view.nav.statsCumulative } })
+			}
+			if(hasTimeRights || hasNoisyTimeRights){
+				menu.push({ text: "Total Nums evolutions",	onclick: { fn: i2b2.ONT.view.nav.statsPoint } })
+			}
 			i2b2.ONT.view.nav.ContextMenu = new YAHOO.widget.ContextMenu( 
 					"divContextMenu-Nav",  
 						{ lazyload: true,
 						trigger: $('ontNavDisp'), 
-						itemdata: [
-							{ text: "Refresh All",	onclick: { fn: i2b2.ONT.view.nav.doRefreshAll } },
-							{ text: "Stats",	onclick: { fn: i2b2.ONT.view.nav.stats } }
-					] }  
+						itemdata: menu }  
 			); 
 			i2b2.ONT.view.nav.ContextMenu.subscribe("triggerContextMenu",i2b2.ONT.view.nav.ContextMenuValidate);			
 // ===================================================================
@@ -272,12 +279,22 @@ i2b2.ONT.view.nav.doRefreshAll = function() {
 }
 
 //================================================================================================== //
-i2b2.ONT.view.nav.stats = function(p_oEvent) {
+i2b2.ONT.view.nav.statsCumulative = function(p_oEvent) {
 	var statsWindow = window.open('js-i2b2/cells/ONT/load.html',"Stats",'width=1100,height=800');
 	var node = i2b2.ONT.view.nav.current;
 	var key = node.data.i2b2_SDX.sdxInfo.sdxKeyValue;
 	i2b2.CRYPTO.distribution="cumulative";//can be point or cumulative
 	i2b2.CRYPTO.pointDistribution = false;
+	i2b2.ONT.ctrlr.gen.getTotalNums(key);
+}
+
+//================================================================================================== //
+i2b2.ONT.view.nav.statsPoint = function(p_oEvent) {
+	var statsWindow = window.open('js-i2b2/cells/ONT/load.html',"Stats",'width=1100,height=800');
+	var node = i2b2.ONT.view.nav.current;
+	var key = node.data.i2b2_SDX.sdxInfo.sdxKeyValue;
+	i2b2.CRYPTO.distribution="point";//can be point or cumulative
+	i2b2.CRYPTO.pointDistribution = true;
 	i2b2.ONT.ctrlr.gen.getTotalNums(key);
 }
 

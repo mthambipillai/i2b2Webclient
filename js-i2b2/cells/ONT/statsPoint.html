@@ -18,11 +18,6 @@
 				window.opener.readypoint = false;
 				window.opener.queryPoint();			
 			}
-			function queryNewCumulativeData(){
-				updateTimeRange();
-				window.opener.readycumulative = false;
-				window.opener.queryCumulative();
-			}
 			function queryNewData(){
 				updateTimeRange();
 				window.opener.readypoint = false;
@@ -55,7 +50,7 @@
 		</script>
 	</head>
 	<body>
-		<h3>Total numbers for concept path 
+		<h3>Total numbers evolutions for concept path 
 			<script type="text/javascript">
 				//(17,-1) is to trim the unnecessary \\i2b2_DIAG\i2b2\ and other path prefixes or suffixes.
 				var str = window.opener.i2b2.CRYPTO.currentConceptPath
@@ -63,17 +58,13 @@
 			</script>
 		</h3>
 		<div id='params'>
-			<form id='update' onsubmit="return queryNewData()">
+			<form id='update' onsubmit="return queryNewPointData()">
 			  From:
 			  <input id='from' type="date" name="from">
 			  To:
 			  <input id='to' type="date" name="to">
-			  <input type="checkbox" id="pointDistribution" value="pointDistribution" unchecked>
-			  <label for="pointDistribution">Display time evolution</label>
-			  <input style="margin-top: 10px" type="submit" name="Apply" value="Apply">
+			  <input type="submit" name="Apply" value="Apply">
 			</form>
-		</div>
-		<div id='chart1'>
 		</div>
 		<div id='chart'>
 		</div>
@@ -83,31 +74,6 @@
 		document.getElementById('from').valueAsDate = new Date(yearToDate(window.opener.i2b2.CRYPTO.fromTime));
 		if(window.opener.evolutionChecked){
 			document.getElementById('pointDistribution').checked = true;
-		}
-		if(window.opener.readycumulative){
-			var d2 = window.opener.dataObjCumulative;
-			var chart2=c3.generate({
-				bindto: '#chart1',
-				data: d2, axis: {
-				x: {
-					type : 'categorized',
-					tick: {
-			            format: function (x) { return ''; }
-			        },
-			        label: {
-			        	text: 'Locations',
-			        	position: 'outer-middle'
-			        }
-			    },
-			    y: {
-			    	label: {
-			        	text: 'Total number',
-			        	position: 'outer-middle'
-			    	}
-			    }
-		    }});
-		}else{
-			document.getElementById('chart1').innerHTML="<h3>Please wait while updating the results...</h3>";
 		}
 		if(window.opener.readypoint){
 			var d1 = window.opener.dataObjPoint;
